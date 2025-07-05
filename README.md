@@ -1,1 +1,0 @@
-# paradigmas_grupo4
