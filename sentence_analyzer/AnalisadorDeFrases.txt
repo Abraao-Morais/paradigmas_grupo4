@@ -1,0 +1,83 @@
+;; Conta caracteres (ignorando espaços)
+(define (contar-caracteres texto)
+  (define (aux lst acc)
+    (cond ((null? lst) acc)
+          ((char=? (car lst) #\space) (aux (cdr lst) acc))
+          (else (aux (cdr lst) (+ acc 1)))))
+  (aux (string->list texto) 0))
+
+;; Converte tudo para minúsculas
+(define (minuscula c)
+  (if (and (char>=? c #\A) (char<=? c #\Z))
+      (integer->char (+ (char->integer c) 32))
+      c))
+
+;; Remove pontuação e transforma para minúsculo
+(define (limpar texto)
+  (define (limpar-aux chars)
+    (cond ((null? chars) '())
+          ((or (char-alphabetic? (car chars)) (char=? (car chars) #\space))
+           (cons (minuscula (car chars)) (limpar-aux (cdr chars))))
+          (else (limpar-aux (cdr chars)))))
+  (list->string (limpar-aux (string->list texto))))
+
+;; Divide texto em palavras (separadas por espaço)
+(define (separar-palavras texto)
+  (define (split chars palavra acc)
+    (cond ((null? chars)
+           (if (null? palavra)
+               (reverse acc)
+               (reverse (cons (list->string (reverse palavra)) acc))))
+          ((char=? (car chars) #\space)
+           (if (null? palavra)
+               (split (cdr chars) '() acc)
+               (split (cdr chars) '() (cons (list->string (reverse palavra)) acc))))
+          (else
+           (split (cdr chars) (cons (car chars) palavra) acc))))
+  (split (string->list texto) '() '()))
+
+;; Conta frequência de palavras
+(define (incrementar palavra freq)
+  (define (aux lst resultado)
+    (cond ((null? lst) (reverse (cons (cons palavra 1) resultado)))
+          ((string=? (car (car lst)) palavra)
+           (append (reverse resultado)
+                   (cons (cons palavra (+ 1 (cdr (car lst))))
+                         (cdr lst))))
+          (else (aux (cdr lst) (cons (car lst) resultado)))))
+  (aux freq '()))
+
+(define (frequencia-palavras palavras)
+  (define (aux lst freq)
+    (if (null? lst)
+        freq
+        (aux (cdr lst) (incrementar (car lst) freq))))
+  (aux palavras '()))
+
+;; Impressão da frequência
+(define (imprimir-frequencia freq)
+  (if (null? freq)
+      'ok
+      (begin
+        (display "  ")
+        (display (car (car freq)))
+        (display ": ")
+        (display (cdr (car freq)))
+        (newline)
+        (imprimir-frequencia (cdr freq)))))
+
+;; Função principal
+(define (analisar-frase texto)
+  (let* ((limpo (limpar texto))
+         (palavras (separar-palavras limpo))
+         (num-palavras (length palavras))
+         (num-caracteres (contar-caracteres texto))
+         (frequencia (frequencia-palavras palavras)))
+    (display "Frase analisada: ") (display texto) (newline)
+    (display "Palavras: ") (display num-palavras) (newline)
+    (display "Caracteres (sem espaço): ") (display num-caracteres) (newline)
+    (display "Frequência das palavras:") (newline)
+    (imprimir-frequencia frequencia)))
+
+;; Exemplo de uso:
+(analisar-frase "Socorram me subi no onibus em Marrocos.")

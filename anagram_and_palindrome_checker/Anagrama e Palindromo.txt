@@ -1,0 +1,18 @@
+% Verifica se duas palavras são anagramas (ignorando maiúsculas/minúsculas)
+anagrama(P1, P2) :-
+    string_lower(P1, L1),
+    string_lower(P2, L2),
+    string_chars(L1, C1),
+    string_chars(L2, C2),
+    msort(C1, Sorted),
+    msort(C2, Sorted).
+ 
+% Verifica se uma palavra ou frase é palíndroma, ignorando espaços e maiúsculas
+palindromo(P) :-
+    string_lower(P, Lower),
+    string_chars(Lower, Chars),
+    exclude(espaco, Chars, SemEspacos),
+    reverse(SemEspacos, SemEspacos).
+ 
+% Predicado auxiliar que reconhece espaços
+espaco(' ').
